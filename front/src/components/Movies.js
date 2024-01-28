@@ -13,7 +13,7 @@ const Movies = () => {
       headers,
     };
 
-    fetch("http://localhost:8080/movies/", options).then((response) => {
+    fetch("http://localhost:8080/movies", options).then((response) => {
       response
         .json()
         .then((data) => {
