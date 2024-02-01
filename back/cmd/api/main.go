@@ -26,7 +26,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	defer app.DB.Close()
 	app.DB = conn
 
 	app.Domain = "example.com"
