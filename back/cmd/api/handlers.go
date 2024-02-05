@@ -33,7 +33,7 @@ func (app *application) AllMovies(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) authenticate(w http.ResponseWriter, r *http.Request) {
-	// read json payload
+
 	var requestPayload struct {
 		Email    string `json:"email"`
 		Password string `json:"password"`
@@ -45,28 +45,24 @@ func (app *application) authenticate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// validate user against database
 	user, err := app.DB.GetUserByEmail(requestPayload.Email)
 	if err != nil {
 		app.errorJSON(w, errors.New("invalid credentials"), http.StatusBadRequest)
 		return
 	}
 
-	// check password
 	valid, err := user.PasswordMatches(requestPayload.Password)
 	if err != nil || !valid {
 		app.errorJSON(w, errors.New("invalid credentials"), http.StatusBadRequest)
 		return
 	}
 
-	// create a jwt user
 	u := jwtUser{
 		ID:        user.ID,
 		FirstName: user.FirstName,
 		LastName:  user.LastName,
 	}
 
-	// generate tokens
 	tokens, err := app.auth.GenerateTokenPair(&u)
 	if err != nil {
 		app.errorJSON(w, err)
@@ -85,7 +81,6 @@ func (app *application) refreshToken(w http.ResponseWriter, r *http.Request) {
 			claims := &Claims{}
 			refreshToken := cookie.Value
 
-			// parse the token to get the claims
 			_, err := jwt.ParseWithClaims(refreshToken, claims, func(token *jwt.Token) (interface{}, error) {
 				return []byte(app.JWTSecret), nil
 			})
@@ -94,7 +89,6 @@ func (app *application) refreshToken(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			// get the user id from the token claims
 			userID, err := strconv.Atoi(claims.Subject)
 			if err != nil {
 				app.errorJSON(w, errors.New("unknown user"), http.StatusUnauthorized)
