@@ -153,13 +153,12 @@ func (app *application) MovieCatalog(w http.ResponseWriter, r *http.Request) {
 func (app *application) GetMovie(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	movieID, err := strconv.Atoi(id)
-	if err != nil || movieID < 1 {
-		app.errorJSON(w, errors.New("invalid movie id"), http.StatusBadRequest)
+	if err != nil {
+		app.errorJSON(w, err)
 		return
 	}
 
 	movie, err := app.DB.OneMovie(movieID)
-
 	if err != nil {
 		app.errorJSON(w, err)
 		return
@@ -167,11 +166,12 @@ func (app *application) GetMovie(w http.ResponseWriter, r *http.Request) {
 
 	_ = app.writeJSON(w, http.StatusOK, movie)
 }
+
 func (app *application) MovieForEdit(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	movieID, err := strconv.Atoi(id)
-	if err != nil || movieID < 1 {
-		app.errorJSON(w, errors.New("invalid movie id"), http.StatusBadRequest)
+	if err != nil {
+		app.errorJSON(w, err)
 		return
 	}
 
@@ -254,7 +254,7 @@ func (app *application) getPoster(movie models.Movie) models.Movie {
 		return movie
 	}
 
-	req.Header.Set("Accept", "application/json")
+	req.Header.Add("Accept", "application/json")
 	req.Header.Add("Content-Type", "application/json")
 
 	resp, err := client.Do(req)
@@ -289,8 +289,6 @@ func (app *application) UpdateMovie(w http.ResponseWriter, r *http.Request) {
 		app.errorJSON(w, err)
 		return
 	}
-
-	payload.UpdatedAt = time.Now()
 
 	movie, err := app.DB.OneMovie(payload.ID)
 	if err != nil {
@@ -327,14 +325,13 @@ func (app *application) UpdateMovie(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) DeleteMovie(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "id")
-	movieID, err := strconv.Atoi(id)
-	if err != nil || movieID < 1 {
-		app.errorJSON(w, errors.New("invalid movie id"), http.StatusBadRequest)
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		app.errorJSON(w, err)
 		return
 	}
 
-	err = app.DB.DeleteMovie(movieID)
+	err = app.DB.DeleteMovie(id)
 	if err != nil {
 		app.errorJSON(w, err)
 		return
@@ -349,17 +346,17 @@ func (app *application) DeleteMovie(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) AllMoviesByGenre(w http.ResponseWriter, r *http.Request) {
-	genreID, err := strconv.Atoi(chi.URLParam(r, "id"))
-	if err != nil || genreID < 1 {
-		app.errorJSON(w, errors.New("invalid genre id"), http.StatusBadRequest)
-		return
-	}
-
-	movies, err := app.DB.AllMovies(genreID)
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
 		app.errorJSON(w, err)
 		return
 	}
 
-	_ = app.writeJSON(w, http.StatusOK, movies)
+	movies, err := app.DB.AllMovies(id)
+	if err != nil {
+		app.errorJSON(w, err)
+		return
+	}
+
+	app.writeJSON(w, http.StatusOK, movies)
 }

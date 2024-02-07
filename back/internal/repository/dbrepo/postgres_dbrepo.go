@@ -283,6 +283,8 @@ func (m *PostgresDBRepo) AllGenres() ([]*models.Genre, error) {
 		err := rows.Scan(
 			&g.ID,
 			&g.Genre,
+			&g.CreatedAt,
+			&g.UpdatedAt,
 		)
 		if err != nil {
 			return nil, err

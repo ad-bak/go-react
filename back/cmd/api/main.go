@@ -9,6 +9,8 @@ import (
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/joho/godotenv" // Import godotenv
 )
 
 const port = 8080
@@ -26,6 +28,21 @@ type application struct {
 }
 
 func main() {
+	// Load .env file
+	if err := godotenv.Load(); err != nil {
+		log.Println("Warning: No .env file found")
+	}
+
+	// Retrieve the API_KEY from environment variables
+	apiKey := os.Getenv("API_KEY")
+
+	// Check if the API_KEY is not set or is set to "undefined"
+	if apiKey == "" || apiKey == "undefined" {
+		log.Fatal("API_KEY environment variable is not set or is set to 'undefined'")
+	} else {
+		log.Println("API_KEY is set correctly.")
+	}
+
 	// set application config
 	var app application
 
