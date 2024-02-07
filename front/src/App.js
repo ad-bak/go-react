@@ -15,61 +15,59 @@ function App() {
     const requestOptions = {
       method: "GET",
       credentials: "include",
-    };
+    }
 
     fetch(`/logout`, requestOptions)
-      .catch((error) => {
-        console.log("error logging out", error);
-      })
-      .finally(() => {
-        setJwtToken("");
-        toggleRefresh(false);
-      });
+    .catch(error => {
+      console.log("error logging out", error);
+    })
+    .finally(() => {
+      setJwtToken("");
+      toggleRefresh(false);
+    })
 
     navigate("/login");
-  };
+  }
 
-  const toggleRefresh = useCallback(
-    (status) => {
-      console.log("clicked");
+  const toggleRefresh = useCallback((status) => {
+    console.log("clicked");
 
-      if (status) {
-        console.log("turning on ticking");
-        let i = setInterval(() => {
-          const requestOptions = {
-            method: "GET",
-            credentials: "include",
-          };
+    if (status) {
+      console.log("turning on ticking");
+      let i  = setInterval(() => {
 
-          fetch(`/refresh`, requestOptions)
-            .then((response) => response.json())
-            .then((data) => {
-              if (data.access_token) {
-                setJwtToken(data.access_token);
-              }
-            })
-            .catch((error) => {
-              console.log("user is not logged in");
-            });
-        }, 600000);
-        setTickInterval(i);
-        console.log("setting tick interval to", i);
-      } else {
-        console.log("turning off ticking");
-        console.log("turning off tickInterval", tickInterval);
-        setTickInterval(null);
-        clearInterval(tickInterval);
-      }
-    },
-    [tickInterval],
-  );
+        const requestOptions = {
+          method: "GET",
+          credentials: "include",
+        }
+
+        fetch(`/refresh`, requestOptions)
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.access_token) {
+            setJwtToken(data.access_token);
+          }
+        })
+        .catch(error => {
+          console.log("user is not logged in");
+        })
+      }, 600000);
+      setTickInterval(i);
+      console.log("setting tick interval to", i);
+    } else {
+      console.log("turning off ticking");
+      console.log("turning off tickInterval", tickInterval);
+      setTickInterval(null);
+      clearInterval(tickInterval);
+    }
+  }, [tickInterval])
 
   useEffect(() => {
     if (jwtToken === "") {
       const requestOptions = {
         method: "GET",
         credentials: "include",
-      };
+      }
 
       fetch(`/refresh`, requestOptions)
         .then((response) => response.json())
@@ -79,11 +77,11 @@ function App() {
             toggleRefresh(true);
           }
         })
-        .catch((error) => {
+        .catch(error => {
           console.log("user is not logged in", error);
-        });
+        })
     }
-  }, [jwtToken, toggleRefresh]);
+  }, [jwtToken, toggleRefresh])
 
   return (
     <div className="container">
