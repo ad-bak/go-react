@@ -314,3 +314,64 @@ func (m *PostgresDBRepo) InsertMovie(movie models.Movie) (int, error) {
 
 	return newID, nil
 }
+
+func (m *PostgresDBRepo) UpdateMovie(movie models.Movie) error {
+	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
+	defer cancel()
+
+	stmt := `update movies set title = $1, release_date = $2, runtime = $3, mpaa_rating = $4,
+			description = $5, image = $6, updated_at = $7 where id = $8`
+
+	_, err := m.DB.ExecContext(ctx, stmt,
+		movie.Title,
+		movie.ReleaseDate,
+		movie.RunTime,
+		movie.MPAARating,
+		movie.Description,
+		movie.Image,
+		time.Now(),
+		movie.ID,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *PostgresDBRepo) UpdateMovieGenres(id int, genreIDs []int) error {
+	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
+	defer cancel()
+
+	stmt := `delete from movies_genres where movie_id = $1`
+
+	_, err := m.DB.ExecContext(ctx, stmt, id)
+	if err != nil {
+		return err
+	}
+
+	for _, n := range genreIDs {
+		stmt = `insert into movies_genres (movie_id, genre_id) values ($1, $2)`
+		_, err = m.DB.ExecContext(ctx, stmt, id, n)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *PostgresDBRepo) DeleteMovie(id int) error {
+	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
+	defer cancel()
+
+	stmt := `delete from movies where id = $1`
+
+	_, err := m.DB.ExecContext(ctx, stmt, id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
